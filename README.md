@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# AI Pantry Tracker
+
+This project is part of the 2024 Headstarter AI Summer Fellowship. It's an AI-powered Pantry Tracker built with Next.js, Tailwind CSS, Firebase, and Material UI.
+
+## Project Overview
+
+AI Pantry Tracker helps users manage their kitchen inventory efficiently. Using artificial intelligence, it assists in tracking pantry items, suggesting recipes based on available ingredients, and optimizing grocery shopping.
+
+## Features
+
+- AI-powered ingredient recognition
+- Real-time inventory tracking
+- Recipe suggestions based on available items
+- Smart shopping list generation
+- User-friendly interface with Material UI components
+
+## Technologies Used
+
+- [Next.js](https://nextjs.org/) - React framework for production
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Firebase](https://firebase.google.com/) - Backend and database
+- [Material UI](https://mui.com/) - React UI component library
 
 ## Getting Started
 
 First, run the development server:
 
-```bash
+bash
 npm run dev
-# or
+or
 yarn dev
-# or
+or
 pnpm dev
-# or
+or
 bun dev
-```
+
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+To learn more about the technologies used in this project, check out the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Material UI Documentation](https://mui.com/material-ui/getting-started/)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+This project can be easily deployed on [Vercel](https://vercel.com/), the platform from the creators of Next.js.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This project is part of the Headstarter AI Summer Fellowship. Contributions, feedback, and suggestions are welcome!
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
