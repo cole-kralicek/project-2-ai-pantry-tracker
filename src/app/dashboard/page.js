@@ -13,12 +13,15 @@ import {
   getDoc,
 } from 'firebase/firestore'
 
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Fab } from '@mui/material'
 import Head from 'next/head'
 import Header from '../../components/Header.js'
 
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
+import {Pagination} from '@mui/material'
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 
 const style = {
@@ -36,48 +39,41 @@ const style = {
   gap: 3,
 }
 
-  // Uses old methods of Material UI 
-  const Search = styled('div')(({ theme }) => ({
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.primary.main, 0.15),
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.25),
-    },
-    marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(1),
-      width: 'auto',
-    },
-  }));
-  
-  const SearchIconWrapper = styled('div')(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }));
-  
-  const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: 'inherit',
-    width: '100%',
-    '& .MuiInputBase-input': {
-      padding: theme.spacing(1, 1, 1, 0),
-      // vertical padding + font size from searchIcon
-      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-      transition: theme.transitions.create('width'),
-      [theme.breakpoints.up('sm')]: {
-        width: '12ch',
-        '&:focus': {
-          width: '20ch',
-        },
-      },
-    },
-  }));
+// Uses old methods of Material UI 
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.primary.main, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.primary.main, 0.25),
+  },
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(1),
+    width: 'auto',
+  },
+}));
+
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  width: '14.75ch',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    textAlign: 'right'
+  },
+}));
 
 export default function Home() {
   const [inventory, setInventory] = useState([])
@@ -138,8 +134,7 @@ export default function Home() {
     const docRef = doc(collection(firestore, `users/${user.uid}/inventory`), item)
     const docSnap = await getDoc(docRef)
     if (docSnap.exists()) {
-      const { quantity } = docSnap.data()
-      await setDoc(docRef, { quantity: quantity + 1 })
+      console.log('Item already exists in pantry.'); 
     } else {
       await setDoc(docRef, { quantity: 1 })
     }
@@ -147,6 +142,31 @@ export default function Home() {
   }
   
   const removeItem = async (item) => {
+    if (!isFirestoreReady || !user) return;
+
+    const docRef = doc(collection(firestore, `users/${user.uid}/inventory`), item)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+      await deleteDoc(docRef)
+    } else {
+      console.log("Item is not in inventory"); 
+    }
+    await updateInventory(user.uid)
+  }
+
+  const increaseItem = async (item) => {
+    if (!isFirestoreReady || !user) return;
+
+    const docRef = doc(collection(firestore, `users/${user.uid}/inventory`), item)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+      const { quantity } = docSnap.data()
+      await setDoc(docRef, { quantity: quantity + 1 })
+    }
+    await updateInventory(user.uid)
+  }
+
+  const decreaseItem = async (item) => {
     if (!isFirestoreReady || !user) return;
 
     const docRef = doc(collection(firestore, `users/${user.uid}/inventory`), item)
@@ -197,17 +217,6 @@ export default function Home() {
         overflow="auto"
         padding={5}
       >
-        <Search>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Search…"
-            inputProps={{ 'aria-label': 'search' }}
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-        </Search>
         <Modal
           open={open}
           onClose={handleClose}
@@ -240,17 +249,30 @@ export default function Home() {
             </Stack>
           </Box>
         </Modal>
-        <TableContainer component={Paper} sx={{ width: '800px', maxHeight: '400px'}}>
+        <TableContainer component={Paper} sx={{ width: '800px', maxHeight: '496px'}}>
           <Table stickyHeader aria-label="inventory table">
             <TableHead>
               <TableRow>
-                <TableCell colSpan={3}>
+                <TableCell colSpan={2}>
                   <Typography variant="h4" color="#333" textAlign="left">
                     My Pantry
                   </Typography>
                 </TableCell>
+                <TableCell align="right">
+                  <Search>
+                    <SearchIconWrapper>
+                      <SearchIcon />
+                    </SearchIconWrapper>
+                    <StyledInputBase
+                      placeholder="Search…"
+                      inputProps={{ 'aria-label': 'search' }}
+                      value={searchTerm}
+                      onChange={handleSearch}
+                    />
+                  </Search>
+                </TableCell>
               </TableRow>
-              <TableRow>
+              <TableRow variant='head'>
                 <TableCell>Item Name</TableCell>
                 <TableCell align="right">Quantity</TableCell>
                 <TableCell align="right">Action</TableCell>
@@ -262,7 +284,15 @@ export default function Home() {
                   <TableCell component="th" scope="row">
                     {name.charAt(0).toUpperCase() + name.slice(1)}
                   </TableCell>
-                  <TableCell align="right">{quantity}</TableCell>
+                  <TableCell align="right">
+                    <Fab sx={{transform: 'scale(0.7)'}} size='small' color="primary" variant='circular' onClick={() => increaseItem(name)}>
+                      <AddIcon/>
+                    </Fab>
+                    {quantity}
+                    <Fab sx={{transform: 'scale(0.7)'}} size='small' color="primary" variant='circular' onClick={() => decreaseItem(name)}>
+                      <RemoveIcon/>
+                    </Fab>
+                  </TableCell>
                   <TableCell align="right">
                     <Button variant="contained" onClick={() => removeItem(name)}>
                       Remove
@@ -273,10 +303,30 @@ export default function Home() {
             </TableBody>
           </Table>
         </TableContainer>
-        <Box width="800px" display="flex" justifyContent="flex-start">
-          <Button variant="contained" onClick={handleOpen}>
-            Add New Item
-          </Button>
+        <Box 
+          width="800px" 
+          display="flex" 
+          justifyContent="space-between" 
+          alignItems="center"
+          position="relative"
+          pointerEvents="none"
+        >
+          <Box pointerEvents='auto'>
+            <Button variant="contained" onClick={handleOpen}>
+              Add New Item
+            </Button>
+          </Box>
+          <Box 
+            position="absolute" 
+            left="0" 
+            right="0" 
+            display="flex" 
+            justifyContent="center"
+          >
+          <Box pointerEvents="auto" marginleft="120px">
+            <Pagination count={inventory.length > 0 ? Math.ceil(inventory.length / 5) : 1} />
+          </Box>
+          </Box>
         </Box>
       </Box>
     </>
