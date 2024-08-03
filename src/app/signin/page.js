@@ -21,7 +21,7 @@ const SignInPage = () => {
   const router = useRouter();
 
   const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
-  const [signInWithGoogle, user, loading, error] = useSignInWithGoogle(auth);
+  const [signInWithGoogle] = useSignInWithGoogle(auth);
 
   const handleSubmit = async (event) => {
     event.preventDefault();

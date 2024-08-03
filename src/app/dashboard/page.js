@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Box, Stack, Typography, Button, Modal, TextField, InputBase } from '@mui/material'
 import { firestore, auth } from '../../firebase'
 import {
@@ -36,12 +36,58 @@ const style = {
   gap: 3,
 }
 
+  // Uses old methods of Material UI 
+  const Search = styled('div')(({ theme }) => ({
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: alpha(theme.palette.primary.main, 0.15),
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.25),
+    },
+    marginLeft: 0,
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing(1),
+      width: 'auto',
+    },
+  }));
+  
+  const SearchIconWrapper = styled('div')(({ theme }) => ({
+    padding: theme.spacing(0, 2),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }));
+  
+  const StyledInputBase = styled(InputBase)(({ theme }) => ({
+    color: 'inherit',
+    width: '100%',
+    '& .MuiInputBase-input': {
+      padding: theme.spacing(1, 1, 1, 0),
+      // vertical padding + font size from searchIcon
+      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+      transition: theme.transitions.create('width'),
+      [theme.breakpoints.up('sm')]: {
+        width: '12ch',
+        '&:focus': {
+          width: '20ch',
+        },
+      },
+    },
+  }));
+
 export default function Home() {
   const [inventory, setInventory] = useState([])
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
 
   const [user, setUser] = useState(null);
+
+  const [searchTerm, setSearchTerm] = useState('');
+
 
 
   const [isFirestoreReady, setIsFirestoreReady] = useState(false);
@@ -119,48 +165,16 @@ export default function Home() {
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
 
-  // Uses old methods of Material UI 
-  const Search = styled('div')(({ theme }) => ({
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.common.white, 0.15),
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.common.white, 0.25),
-    },
-    marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(1),
-      width: 'auto',
-    },
-  }));
-  
-  const SearchIconWrapper = styled('div')(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }));
-  
-  const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: 'inherit',
-    width: '100%',
-    '& .MuiInputBase-input': {
-      padding: theme.spacing(1, 1, 1, 0),
-      // vertical padding + font size from searchIcon
-      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-      transition: theme.transitions.create('width'),
-      [theme.breakpoints.up('sm')]: {
-        width: '12ch',
-        '&:focus': {
-          width: '20ch',
-        },
-      },
-    },
-  }));
+  const handleSearch = (event) => {
+    event.preventDefault();
+    setSearchTerm(event.target.value); 
+  }
+
+  const filteredInventory = useMemo(() => {
+    return inventory.filter(item =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [inventory, searchTerm])
 
   return (
     <>
@@ -183,6 +197,17 @@ export default function Home() {
         overflow="auto"
         padding={5}
       >
+        <Search>
+          <SearchIconWrapper>
+            <SearchIcon />
+          </SearchIconWrapper>
+          <StyledInputBase
+            placeholder="Search…"
+            inputProps={{ 'aria-label': 'search' }}
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+        </Search>
         <Modal
           open={open}
           onClose={handleClose}
@@ -215,15 +240,6 @@ export default function Home() {
             </Stack>
           </Box>
         </Modal>
-        <Search>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Search…"
-            inputProps={{ 'aria-label': 'search' }}
-          />
-        </Search>
         <TableContainer component={Paper} sx={{ width: '800px', maxHeight: '400px'}}>
           <Table stickyHeader aria-label="inventory table">
             <TableHead>
@@ -241,7 +257,7 @@ export default function Home() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {inventory.map(({ name, quantity }) => (
+              {filteredInventory.map(({ name, quantity }) => (
                 <TableRow key={name}>
                   <TableCell component="th" scope="row">
                     {name.charAt(0).toUpperCase() + name.slice(1)}
