@@ -13,7 +13,7 @@ import {
   getDoc,
 } from 'firebase/firestore'
 
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Fab } from '@mui/material'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Fab, TablePagination } from '@mui/material'
 import Head from 'next/head'
 import Header from '../../components/Header.js'
 
@@ -83,6 +83,9 @@ export default function Home() {
   const [user, setUser] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10); 
 
 
 
@@ -196,6 +199,15 @@ export default function Home() {
     )
   }, [inventory, searchTerm])
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
   return (
     <>
       <Head>
@@ -216,6 +228,11 @@ export default function Home() {
         bgcolor={'#F0F4F8'}
         overflow="auto"
         padding={5}
+      >
+      <Paper
+        width='100%'
+        overflow='hidden'
+        textAlign='center'
       >
         <Modal
           open={open}
@@ -249,7 +266,7 @@ export default function Home() {
             </Stack>
           </Box>
         </Modal>
-        <TableContainer component={Paper} sx={{ width: '800px', maxHeight: '496px'}}>
+        <TableContainer component={Paper} sx={{ width: '800px', maxHeight: '650px'}}>
           <Table stickyHeader aria-label="inventory table">
             <TableHead>
               <TableRow>
@@ -279,7 +296,7 @@ export default function Home() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredInventory.map(({ name, quantity }) => (
+              {filteredInventory.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(({ name, quantity }) => (
                 <TableRow key={name}>
                   <TableCell component="th" scope="row">
                     {name.charAt(0).toUpperCase() + name.slice(1)}
@@ -303,13 +320,22 @@ export default function Home() {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filteredInventory.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+        </Paper>
         <Box 
           width="800px" 
           display="flex" 
           justifyContent="space-between" 
           alignItems="center"
           position="relative"
-          pointerEvents="none"
         >
           <Box pointerEvents='auto'>
             <Button variant="contained" onClick={handleOpen}>
@@ -323,9 +349,6 @@ export default function Home() {
             display="flex" 
             justifyContent="center"
           >
-          <Box pointerEvents="auto" marginleft="120px">
-            <Pagination count={inventory.length > 0 ? Math.ceil(inventory.length / 5) : 1} />
-          </Box>
           </Box>
         </Box>
       </Box>
