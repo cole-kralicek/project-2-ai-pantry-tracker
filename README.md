@@ -1,17 +1,14 @@
-# AI Pantry Tracker
+# Pantry Tracker
 
 This project is part of the 2024 Headstarter AI Summer Fellowship. It's an AI-powered Pantry Tracker built with Next.js, Tailwind CSS, Firebase, and Material UI.
 
 ## Project Overview
 
-AI Pantry Tracker helps users manage their kitchen inventory efficiently. Using artificial intelligence, it assists in tracking pantry items, suggesting recipes based on available ingredients, and optimizing grocery shopping.
+Pantry Tracker helps users manage their kitchen inventory efficiently. 
 
 ## Features
 
-- AI-powered ingredient recognition
 - Real-time inventory tracking
-- Recipe suggestions based on available items
-- Smart shopping list generation
 - User-friendly interface with Material UI components
 
 ## Technologies Used
