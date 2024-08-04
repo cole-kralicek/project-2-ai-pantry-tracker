@@ -19,9 +19,19 @@ import Header from '../../components/Header.js'
 
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
-import {Pagination} from '@mui/material'
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import EditIcon from '@mui/icons-material/Edit';
+import { Edit } from '@mui/icons-material'
+
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true,
+  organization: process.env.NEXT_PUBLIC_ORGANIZATION_KEY,
+  project: process.envNEXT_PUBLIC_PROJECT_KEY
+}); 
 
 
 const style = {
@@ -85,11 +95,18 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10); 
 
 
 
   const [isFirestoreReady, setIsFirestoreReady] = useState(false);
+
+  const generateCategory = async (name) => {
+    const completion = await openai.chat.completions.create({
+      messages: [{ role: "user", content: `Categorize ${name} in 1 word.` }],
+      model: "gpt-4o-mini", 
+    })
+    return completion.choices[0].message.content;
+  }
 
   useEffect(() => {
     if (firestore) {
@@ -139,7 +156,7 @@ export default function Home() {
     if (docSnap.exists()) {
       console.log('Item already exists in pantry.'); 
     } else {
-      await setDoc(docRef, { quantity: 1 })
+      await setDoc(docRef, { quantity: 1 }, { category: generateCategory(item.name)})
     }
     await updateInventory(user.uid)
   }
@@ -200,12 +217,8 @@ export default function Home() {
   }, [inventory, searchTerm])
 
   const handleChangePage = (event, newPage) => {
+    event.preventDefault(); 
     setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
   };
 
   return (
@@ -270,7 +283,7 @@ export default function Home() {
           <Table stickyHeader aria-label="inventory table">
             <TableHead>
               <TableRow>
-                <TableCell colSpan={2}>
+                <TableCell colSpan={3}>
                   <Typography variant="h4" color="#333" textAlign="left">
                     My Pantry
                   </Typography>
@@ -292,23 +305,28 @@ export default function Home() {
               <TableRow variant='head'>
                 <TableCell>Item Name</TableCell>
                 <TableCell align="right">Quantity</TableCell>
+                <TableCell align="right">Category</TableCell>
                 <TableCell align="right">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredInventory.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(({ name, quantity }) => (
+              {filteredInventory.slice(page * 5, page * 5 + 5).map(({ name, quantity, category }) => (
                 <TableRow key={name}>
                   <TableCell component="th" scope="row">
                     {name.charAt(0).toUpperCase() + name.slice(1)}
                   </TableCell>
                   <TableCell align="right">
-                    <Fab sx={{transform: 'scale(0.7)'}} size='small' color="primary" variant='circular' onClick={() => increaseItem(name)}>
+                    <Fab sx={{transform: 'scale(0.6)'}} size='small' color="primary" variant='circular' onClick={() => increaseItem(name)}>
                       <AddIcon/>
                     </Fab>
                     {quantity}
-                    <Fab sx={{transform: 'scale(0.7)'}} size='small' color="primary" variant='circular' onClick={() => decreaseItem(name)}>
+                    <Fab sx={{transform: 'scale(0.6)'}} size='small' color="primary" variant='circular' onClick={() => decreaseItem(name)}>
                       <RemoveIcon/>
                     </Fab>
+                  </TableCell>
+                  <TableCell align="right">
+                    {/* Change to generate category name with database PUT request */}
+                    {category}
                   </TableCell>
                   <TableCell align="right">
                     <Button variant="contained" onClick={() => removeItem(name)}>
@@ -321,13 +339,12 @@ export default function Home() {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[5]}
           component="div"
           count={filteredInventory.length}
-          rowsPerPage={rowsPerPage}
+          rowsPerPage={5}
           page={page}
           onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
         />
         </Paper>
         <Box 
