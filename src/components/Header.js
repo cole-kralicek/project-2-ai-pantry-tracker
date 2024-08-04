@@ -17,7 +17,7 @@ const Header = () => {
           <Drawer />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          AI Pantry Tracker
+          Pantry Tracker
         </Typography>
       </Toolbar>
     </AppBar>

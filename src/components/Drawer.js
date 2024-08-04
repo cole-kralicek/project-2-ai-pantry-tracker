@@ -47,7 +47,7 @@ export default function TemporaryDrawer() {
               <Icon path={mdiFridge} size={1.5}/>
             </SvgIcon>
           </ListItemIcon>
-          <ListItemText primary='AI Pantry Tracker' />
+          <ListItemText primary='Pantry Tracker' />
         </ListItem>
       </List>
       <Divider />
